@@ -2,11 +2,11 @@
 Contributors: zealopensource
 Donate link: http://www.zealousweb.com/payment/
 Tags: contact form, contact, PDF, email
-Requires at least: 3.0.1
+Requires at least: 4.7
 Requires PHP: 5.6
-Tested up to: 6.8
-Stable tag: 4.1.6
-Version: 4.1.6
+Tested up to: 7.0
+Stable tag: 4.2.0
+Version: 4.2.0
 License: GPLv3 or later
 License URI: https://spdx.org/licenses/GPL-3.0-or-later.html
 
@@ -41,11 +41,69 @@ https://mpdf.github.io/html-support/html-tags.html
 * You can set file name from admin also use any form tag instead of file name.
 * Add Page number options in admin so you can add Text with PDF page number.
 * Ability to set font size of PDF content.
+* PDF Submission List: Keep all your form submissions organized and accessible in PDF format for easy viewing and record-keeping.
+* Dedicated PDF Menu in Admin Panel: Quickly manage, view, and configure PDFs from a separate, easy-to-use menu in the WordPress admin dashboard.
+* Live PDF Preview: See exactly how your PDF will look before saving or sending, ensuring perfect formatting every time.
+* Password-Protected PDFs: Secure your generated PDFs with a password to control who can access sensitive information.
+* Access helpful resources including documentation, FAQs, and support options in one place.
+* Easily submit support tickets or explore guides to resolve issues quickly.
+* Stay updated with the latest insights through blogs and newsletter subscriptions.
 * Compatibility of WordPress VIP.
 
 <strong>[Demo for Generate PDF using Contact Form 7](https://demo.zealousweb.com/wordpress-plugins/generate-pdf-using-contact-form-7/)</strong>
 
-== Release Generate PDF using Contact Form 7 Pro ==
+== Features of Generate PDF using Contact Form 7 Pro ==
+
+= PDF Analytics =
+* PDF Analytics Dashboard: View all PDF activity in one place.
+* Usage Tracking: Monitor total PDFs generated, downloads, and emails sent.
+* Error Monitoring: Identify failed PDF generations.
+* Visual Reports: Analyze PDF data with charts (daily, monthly, yearly, custom range).
+* Recent Activity: Track user email, actions, and timestamps.
+* Dashboard Widgets: Enable or disable dashboard widgets as needed.
+
+= Admin Experience =
+* Signature in PDF.
+* Added a new option to Show or Hide Label Field Tags.
+* User Interface: Enjoy a cleaner, more user-friendly admin panel for easy setup and management.
+* New Color Scheme & Branding: Fresh visuals and customizable colors to better match your brand style.
+* More Text Formatting & Fonts: Expanded options to style your PDF content with new fonts and formatting tools.
+* PDF Compression Option: Reduce PDF file size without losing quality to save space and improve speed.
+* Accessibility Enhancements: Improved design to meet accessibility standards and ensure ease of use for everyone.
+* Performance Boost: Faster PDF generation and optimized performance for smoother operation.
+* Insert the post title or current page title dynamically into PDF documents using the shortcode [_post_title] in PDF settings.
+* Add customizable watermark text to one or multiple PDF files.
+* Dynamically generate and send PDFs or use predefined PDF files for user and admin emails.
+* Enable or disable PDF attachments in emails as needed.
+* Display uploaded files from Contact Form 7 within the PDF.
+* Send dynamically generated or predefined PDFs as attachments for both "Mail 1" and "Mail 2" with flexible email address configuration in the Pro version.
+* Allow users to download PDFs via a link after form submission.
+
+= Design & Layout Customization =
+* Choose and apply different fonts for PDF content from a list of supported fonts.
+* Add signature fields for end-users, capturing and embedding signatures as PNG or image files in the PDF using shortcodes.
+* Enhance PDF appearance with custom design options, including background images, background colors, gradients, text colors, and more.
+* Utilize a built-in CSS Editor for adding custom styles to PDFs.
+* Add a page break tag to improve formatting and layout.
+* Introduce a setting to customize the position of the header image in PDF files.
+* Manage headers, footers, and page sizes (A4, A3, Letter, etc.) directly from settings.
+* Provide RTL support for languages requiring right-to-left content alignment.
+
+= Security & Access Control =
+* Implement a security update for improved data protection.
+* Add a tag for creating password-protected PDFs.
+
+= Preview & Formatting =
+* Enable PDF preview from the admin interface without form submission.
+* Display dates in various formats using the PHP Date function.
+* Support special mail tags recognized by Contact Form 7 for PDF content.
+
+= Template & File Management =
+* Utilize the PDF Template feature for selecting from different templates in settings.
+* Display and manage a complete list of created PDF forms and save submitted data to the database.
+* Provide import/export functionality for plugin settings to simplify configuration across multiple sites.
+* Enable CSV export for form data submissions.
+* Allow storing PDFs on servers or third-party storage like Amazon S3, Google Drive, and Dropbox.
 
 <strong>[Get more information of Pro version here](https://store.zealousweb.com/generate-pdf-using-contact-form-7-pro)</strong>
 <strong>[Demo for Generate PDF using Contact Form 7 Pro](https://demo.zealousweb.com/wordpress-plugins/generate-pdf-contact-form-7-pro/)</strong>
@@ -84,12 +142,88 @@ Thank you for choosing a Plugin developed by <strong>[ZealousWeb](https://www.ze
 5. Click ‘Activate Plugin’ to activate it.
 
 == Screenshots ==
-1. Screenshot 'screenshot-1.png' Shows PDF settings of upload PDF in the Contact form.
-2. Screenshot 'screenshot-2.png' PDF settings of Customize PDF in the Contact form.
-3. Screenshot 'screenshot-3.png' New options of Page number and file name settings.
+1. PDF with CF7 Settings — select a contact form and configure PDF operation, download link, email attachment, and header logo options.
+2. PDF with CF7 Settings — customize logo dimensions and PDF page margins (header, footer, top, bottom, left, right).
+3. PDF with CF7 Settings — set font size, show or hide label field tags, edit the PDF message body, file name prefix, and background image.
+4. PDF with CF7 Settings — live PDF preview and password-protected PDF options.
+5. PDF Submissions — view all generated PDFs in one list with form name, download, and view links.
+6. PDF Submissions — open a single submission to see form details, submission date, and PDF view or download links.
+7. Help & Support — access the plugin guide, submit a support ticket, subscribe to the newsletter, and browse FAQs.
 
 
 == Frequently Asked Questions ==
+
+= Can I attach a PDF to Contact Form 7 notification emails? =
+
+Yes. From the admin side, you can attach a PDF file to form notification emails sent to the user and/or administrator.
+
+= Is a PDF download link shown after form submission? =
+
+Yes. A link to the generated PDF can be displayed in the form success message along with your thank you text.
+
+= Can I use different PDF settings for different Contact Form 7 forms? =
+
+Yes. You can configure a separate PDF for each contact form and create as many forms as you need.
+
+= Can I generate a PDF with submitted form data? =
+
+Yes. You can create a custom PDF using the data submitted through the contact form.
+
+= Can I add a logo and form fields to the PDF? =
+
+Yes. You can customize the PDF by adding a header logo and including relevant form field values in the PDF content.
+
+= Can I update the header and footer content of the PDF? =
+
+Yes. You can add content to the PDF header and footer from the admin side, and set the header and footer margins in the PDF settings.
+
+= Can I include uploaded files from the form with the PDF email attachment? =
+
+Yes. The plugin supports adding file options along with the PDF attachment in mail.
+
+= How do I add a page break in the PDF? =
+
+You can use a page break in the PDF message body so new content moves to the next page.
+
+= How do I show Acceptance field values in the PDF? =
+
+Use a tag that starts with [acceptance-] in the PDF editor. For example, [acceptance-terms-condition] or [acceptance-policy], matching your acceptance field name.
+
+= Can I set a custom PDF file name? =
+
+Yes. You can set the PDF file name prefix from the admin settings and use any form field tag as part of the file name.
+
+= Can I add page numbers to the PDF? =
+
+Yes. Page number options are available in the admin settings so you can display custom text with the PDF page number.
+
+= Can I change font size in PDF file content? =
+
+Yes. The default font size is 9px, but you can change it from the admin side.
+
+= Where can I view past PDF submissions? =
+
+The PDF Submission List keeps all your form submissions organized and accessible in PDF format for easy viewing and record-keeping.
+
+= Is there a dedicated menu for managing PDFs in the WordPress admin? =
+
+Yes. A separate PDF menu in the WordPress admin dashboard lets you quickly manage, view, and configure PDFs.
+
+= Can I preview the PDF before saving or sending? =
+
+Yes. Live PDF Preview lets you see exactly how your PDF will look before saving or sending.
+
+= Can I password-protect generated PDFs? =
+
+Yes. You can secure generated PDFs with a password to control who can access sensitive information.
+
+= Where can I find plugin documentation and support? =
+
+The Help & Support section provides documentation, FAQs, support ticket submission, guides, blogs, and newsletter subscription options in one place.
+
+= Is this plugin compatible with WordPress VIP? =
+
+Yes. The plugin is compatible with the WordPress VIP platform.
 
 = How to upload mpdf TTf Fonts in library =
 
@@ -116,6 +250,20 @@ https://prnt.sc/PsXaTarHTx4m
 S.S https://prnt.sc/-TLx40Qup76r
 
 == Changelog ==
+
+= 4.2.0 =
+* PDF Submission List: Keep all your form submissions organized and accessible in PDF format for easy viewing and record-keeping.
+* Dedicated PDF Menu in Admin Panel: Quickly manage, view, and configure PDFs from a separate, easy-to-use menu in the WordPress admin dashboard.
+* Live PDF Preview: See exactly how your PDF will look before saving or sending, ensuring perfect formatting every time.
+* Password-Protected PDFs: Secure your generated PDFs with a password to control who can access sensitive information.
+* Access helpful resources including documentation, FAQs, and support options in one place.
+* Easily submit support tickets or explore guides to resolve issues quickly.
+* Stay updated with the latest insights through blogs and newsletter subscriptions.
+* Tested with the latest version of WordPress (7.0).
+
+= 4.1.7 =
+* Tested with the latest version of WordPress (7.0).
+* Fix - Sanitize PDF filenames so characters such as / and # in form fields no longer cause errors or broken download links.
 
 = 4.1.6 =
 * Added a new option to Show or Hide Label Field Tags
@@ -303,6 +451,20 @@ S.S https://prnt.sc/-TLx40Qup76r
 
 == Upgrade Notice ==
 
+= 4.2.0 =
+* PDF Submission List: Keep all your form submissions organized and accessible in PDF format for easy viewing and record-keeping.
+* Dedicated PDF Menu in Admin Panel: Quickly manage, view, and configure PDFs from a separate, easy-to-use menu in the WordPress admin dashboard.
+* Live PDF Preview: See exactly how your PDF will look before saving or sending, ensuring perfect formatting every time.
+* Password-Protected PDFs: Secure your generated PDFs with a password to control who can access sensitive information.
+* Access helpful resources including documentation, FAQs, and support options in one place.
+* Easily submit support tickets or explore guides to resolve issues quickly.
+* Stay updated with the latest insights through blogs and newsletter subscriptions.
+* Tested with the latest version of WordPress (7.0).
+
+= 4.1.7 =
+* Tested with the latest version of WordPress (7.0).
+* Fix - Sanitize PDF filenames so characters such as / and # in form fields no longer cause errors or broken download links.
+
 = 4.1.6 =
 * Added a new option to Show or Hide Label Field Tags
 
@@ -479,10 +641,10 @@ S.S https://prnt.sc/-TLx40Qup76r
 * Fix - We have fixed for support Dropdown and Radio button in PDF generate.
 
 = 1.2 =
-Add New Feature to edit PDF Header/Footer Text.
+* Add - Add New Feature to edit PDF Header/Footer Text.
 
 = 1.1 =
-Add support Link.
+* Add support Link.
 
 = 1.0 =
-Release version.
+* Release version.
