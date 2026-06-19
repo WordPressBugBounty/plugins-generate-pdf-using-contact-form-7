@@ -414,6 +414,126 @@ if ( ! class_exists( 'Cf7_Pdf_Submissions' ) ) {
 		}
 
 		/**
+		 * User-friendly PDF tags shown in admin (tag => label).
+		 *
+		 * @return array<string, string>
+		 */
+		public static function get_pdf_special_tags() {
+			return array(
+				'[page-break]'        => array(
+					'label'       => __( 'Page break', 'generate-pdf-using-contact-form-7' ),
+					'description' => __( 'Starts the following content on a new PDF page.', 'generate-pdf-using-contact-form-7' ),
+				),
+				'[date]'              => array(
+					'label'       => __( 'Submission date', 'generate-pdf-using-contact-form-7' ),
+					'description' => __( 'Inserts the date when the form was submitted.', 'generate-pdf-using-contact-form-7' ),
+				),
+				'[time]'              => array(
+					'label'       => __( 'Submission time', 'generate-pdf-using-contact-form-7' ),
+					'description' => __( 'Inserts the time when the form was submitted.', 'generate-pdf-using-contact-form-7' ),
+				),
+				'[random-number]'     => array(
+					'label'       => __( 'Unique number', 'generate-pdf-using-contact-form-7' ),
+					'description' => __( 'Inserts a unique number for each submission.', 'generate-pdf-using-contact-form-7' ),
+				),
+				'[_site_title]'       => array(
+					'label'       => __( 'Site title', 'generate-pdf-using-contact-form-7' ),
+					'description' => __( 'Inserts your WordPress site title.', 'generate-pdf-using-contact-form-7' ),
+				),
+				'[_site_url]'         => array(
+					'label'       => __( 'Site URL', 'generate-pdf-using-contact-form-7' ),
+					'description' => __( 'Inserts your WordPress site URL.', 'generate-pdf-using-contact-form-7' ),
+				),
+				'[_site_description]' => array(
+					'label'       => __( 'Site description', 'generate-pdf-using-contact-form-7' ),
+					'description' => __( 'Inserts your WordPress site tagline.', 'generate-pdf-using-contact-form-7' ),
+				),
+				'[remote_ip]'         => array(
+					'label'       => __( 'Visitor IP address', 'generate-pdf-using-contact-form-7' ),
+					'description' => __( 'Inserts the IP address of the person who submitted the form.', 'generate-pdf-using-contact-form-7' ),
+				),
+				'[_post_title]'       => array(
+					'label'       => __( 'Page title', 'generate-pdf-using-contact-form-7' ),
+					'description' => __( 'Inserts the title of the page where the form was submitted.', 'generate-pdf-using-contact-form-7' ),
+				),
+			);
+		}
+
+		/**
+		 * Convert user-friendly PDF tags to mPDF markup before rendering.
+		 *
+		 * @param string $html Message body HTML.
+		 * @return string
+		 */
+		public static function replace_pdf_special_tags_for_mpdf( $html ) {
+			$cf7pdf_html = (string) $html;
+
+			if ( '' === $cf7pdf_html ) {
+				return '';
+			}
+
+			$cf7pdf_replacements = array(
+				'[page-break]' => '<pagebreak />',
+				'[pagebreak]'  => '<pagebreak />',
+			);
+
+			$cf7pdf_html = str_replace( array_keys( $cf7pdf_replacements ), array_values( $cf7pdf_replacements ), $cf7pdf_html );
+
+			// Normalize raw mPDF page-break tags saved in the editor.
+			$cf7pdf_html = preg_replace( '/<pagebreak\s*\/?>/i', '<pagebreak />', $cf7pdf_html );
+			$cf7pdf_html = preg_replace( '/<page_break\s*\/?>/i', '<pagebreak />', $cf7pdf_html );
+			$cf7pdf_html = preg_replace( '/<newpage\s*\/?>/i', '<pagebreak />', $cf7pdf_html );
+
+			return $cf7pdf_html;
+		}
+
+		/**
+		 * Convert plain-text newlines to <br> outside HTML tags (mPDF ignores raw newlines).
+		 *
+		 * @param string $html Message body fragment.
+		 * @return string
+		 */
+		private static function apply_pdf_body_line_breaks( $html ) {
+			$cf7pdf_html = (string) $html;
+
+			if ( '' === $cf7pdf_html ) {
+				return '';
+			}
+
+			if ( false === strpos( $cf7pdf_html, "\n" ) && false === strpos( $cf7pdf_html, "\r" ) ) {
+				return $cf7pdf_html;
+			}
+
+			$cf7pdf_parts = preg_split( '/(<[^>]+>)/', $cf7pdf_html, -1, PREG_SPLIT_DELIM_CAPTURE );
+
+			if ( ! is_array( $cf7pdf_parts ) ) {
+				return nl2br( $cf7pdf_html, false );
+			}
+
+			$cf7pdf_result = '';
+
+			foreach ( $cf7pdf_parts as $cf7pdf_part ) {
+				if ( '' === $cf7pdf_part ) {
+					continue;
+				}
+
+				if ( '<' === $cf7pdf_part[0] ) {
+					$cf7pdf_result .= $cf7pdf_part;
+					continue;
+				}
+
+				if ( '' === trim( $cf7pdf_part ) ) {
+					$cf7pdf_result .= $cf7pdf_part;
+					continue;
+				}
+
+				$cf7pdf_result .= nl2br( $cf7pdf_part, false );
+			}
+
+			return $cf7pdf_result;
+		}
+
+		/**
 		 * Allowed HTML tags for the PDF message body (mPDF template).
 		 *
 		 * @return array
@@ -477,6 +597,36 @@ if ( ! class_exists( 'Cf7_Pdf_Submissions' ) ) {
 					$cf7pdf_allowed[ $cf7pdf_tag ] = array();
 				}
 				$cf7pdf_allowed[ $cf7pdf_tag ] = array_merge( $cf7pdf_allowed[ $cf7pdf_tag ], $cf7pdf_layout_attrs );
+			}
+
+			// mPDF custom tags (not standard HTML; required for page breaks and layout).
+			$cf7pdf_mpdf_pagebreak_attrs = array(
+				'type'              => true,
+				'resetpagenum'      => true,
+				'pagenumstyle'      => true,
+				'suppress'          => true,
+				'page-break-type'   => true,
+				'page-selector'     => true,
+				'orientation'       => true,
+				'sheet-size'        => true,
+				'margin-right'      => true,
+				'margin-left'       => true,
+				'margin-top'        => true,
+				'margin-bottom'     => true,
+				'margin-header'     => true,
+				'margin-footer'     => true,
+				'odd-header-name'   => true,
+				'even-header-name'  => true,
+				'odd-footer-name'   => true,
+				'even-footer-name'  => true,
+				'odd-header-value'  => true,
+				'even-header-value' => true,
+				'odd-footer-value'  => true,
+				'even-footer-value' => true,
+			);
+
+			foreach ( array( 'pagebreak', 'page_break', 'newpage' ) as $cf7pdf_mpdf_tag ) {
+				$cf7pdf_allowed[ $cf7pdf_mpdf_tag ] = $cf7pdf_mpdf_pagebreak_attrs;
 			}
 
 			return $cf7pdf_allowed;
@@ -555,15 +705,17 @@ if ( ! class_exists( 'Cf7_Pdf_Submissions' ) ) {
 				$cf7pdf_body = trim( $cf7pdf_body );
 			}
 
+			$cf7pdf_body = self::apply_pdf_body_line_breaks( $cf7pdf_body );
+
 			if ( '' !== $cf7pdf_styles && '' !== $cf7pdf_body ) {
-				return $cf7pdf_styles . "\n" . $cf7pdf_body;
+				$cf7pdf_result = $cf7pdf_styles . "\n" . $cf7pdf_body;
+			} elseif ( '' !== $cf7pdf_styles ) {
+				$cf7pdf_result = $cf7pdf_styles;
+			} else {
+				$cf7pdf_result = $cf7pdf_body;
 			}
 
-			if ( '' !== $cf7pdf_styles ) {
-				return $cf7pdf_styles;
-			}
-
-			return $cf7pdf_body;
+			return self::replace_pdf_special_tags_for_mpdf( $cf7pdf_result );
 		}
 
 		/**
@@ -839,6 +991,7 @@ Your Message : [your-message]', 'generate-pdf-using-contact-form-7' );
 				$cf7pdf_message .= ' ' . wp_json_encode( $data );
 			}
 
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Used only when WP_DEBUG_LOG is enabled.
 			error_log( $cf7pdf_message );
 		}
 
@@ -933,7 +1086,11 @@ Your Message : [your-message]', 'generate-pdf-using-contact-form-7' );
 		 * @return array|null
 		 */
 		private static function get_nested_settings_upload_file() {
-			if ( ! isset( $_FILES['wp_cf7_pdf_settings'] ) || ! is_array( $_FILES['wp_cf7_pdf_settings'] ) ) {
+			if ( ! self::verify_settings_save_nonce() ) {
+				return null;
+			}
+
+			if ( ! isset( $_FILES['wp_cf7_pdf_settings'] ) || ! is_array( $_FILES['wp_cf7_pdf_settings'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 				return null;
 			}
 
@@ -1044,18 +1201,27 @@ Your Message : [your-message]', 'generate-pdf-using-contact-form-7' );
 				'error'     => '',
 			);
 
-			$cf7pdf_old_from_post = '';
-			if ( isset( $_POST['wp_cf7_pdf_settings']['cf7_opt_attach_pdf_old_url'] ) ) {
-				$cf7pdf_old_from_post = sanitize_file_name( wp_unslash( $_POST['wp_cf7_pdf_settings']['cf7_opt_attach_pdf_old_url'] ) );
+			if ( ! self::verify_settings_save_nonce() ) {
+				return $cf7pdf_result;
 			}
 
-			self::debug_log( '$_FILES[wp_cf7_pdf_settings]', isset( $_FILES['wp_cf7_pdf_settings'] ) ? $_FILES['wp_cf7_pdf_settings'] : 'missing' );
+			$cf7pdf_old_from_post = '';
+			$cf7pdf_settings_input = filter_input(
+				INPUT_POST,
+				'wp_cf7_pdf_settings',
+				FILTER_DEFAULT,
+				FILTER_REQUIRE_ARRAY
+			);
+
+			if ( is_array( $cf7pdf_settings_input ) && isset( $cf7pdf_settings_input['cf7_opt_attach_pdf_old_url'] ) ) {
+				$cf7pdf_old_from_post = sanitize_file_name( wp_unslash( $cf7pdf_settings_input['cf7_opt_attach_pdf_old_url'] ) );
+			}
 
 			$cf7pdf_file           = self::get_nested_settings_upload_file();
 			$cf7pdf_has_new_upload = self::has_new_pdf_upload( $cf7pdf_file );
 
 			self::debug_log(
-				'has_new_pdf_upload',
+				'PDF settings upload request',
 				array(
 					'has_new_upload' => $cf7pdf_has_new_upload,
 					'old_from_post'  => $cf7pdf_old_from_post,
@@ -1148,13 +1314,10 @@ Your Message : [your-message]', 'generate-pdf-using-contact-form-7' );
 
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 
-			$cf7pdf_upload_key = 'cf7pdf_attach_upload';
-			$_FILES[ $cf7pdf_upload_key ] = $cf7pdf_file;
-
 			add_filter( 'upload_dir', array( __CLASS__, 'filter_attach_pdf_upload_dir' ) );
 
 			$cf7pdf_upload = wp_handle_upload(
-				$_FILES[ $cf7pdf_upload_key ],
+				$cf7pdf_file,
 				array(
 					'test_form' => false,
 					'mimes'     => array(
@@ -1164,7 +1327,6 @@ Your Message : [your-message]', 'generate-pdf-using-contact-form-7' );
 			);
 
 			remove_filter( 'upload_dir', array( __CLASS__, 'filter_attach_pdf_upload_dir' ) );
-			unset( $_FILES[ $cf7pdf_upload_key ] );
 
 			self::debug_log( 'wp_handle_upload result', $cf7pdf_upload );
 

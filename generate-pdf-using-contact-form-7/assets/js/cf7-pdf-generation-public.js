@@ -1,78 +1,108 @@
-(function( $ ) {
+( function( $ ) {
 	'use strict';
 
-	/**
-	 * All of the code for your public-facing JavaScript source
-	 * should reside in this file.
-	 *
-	 * Note: It has been assumed you will write jQuery code here, so the
-	 * $ function reference has been prepared for usage within the scope
-	 * of this function.
-	 *
-	 * This enables you to define handlers, for when the DOM is ready:
-	 *
-	 * $(function() {
-	 *
-	 * });
-	 *
-	 * When the window is loaded:
-	 *
-	 * $( window ).load(function() {
-	 *
-	 * });
-	 *
-	 * ...and/or other possibilities.
-	 *
-	 * Ideally, it is not considered best practise to attach more than a
-	 * single DOM-ready or window-load handler for a particular page.
-	 * Although scripts in the WordPress core, Plugins and Themes may be
-	 * practising this, we should strive to set a better example in our own work.
-	 */
+	function getCookie( name ) {
+		var prefix = name + '=';
+		var parts = decodeURIComponent( document.cookie ).split( ';' );
 
-	function getCookie(cname) {
-		var name = cname + "=";
-		var decodedCookie = decodeURIComponent(document.cookie);
-		var ca = decodedCookie.split(';');
-		for(var i = 0; i <ca.length; i++) {
-			var c = ca[i];
-			while (c.charAt(0) == ' ') {
-			  c = c.substring(1);
+		for ( var i = 0; i < parts.length; i++ ) {
+			var part = parts[ i ];
+			while ( ' ' === part.charAt( 0 ) ) {
+				part = part.substring( 1 );
 			}
-			if (c.indexOf(name) == 0) {
-			  return c.substring(name.length, c.length);
+			if ( 0 === part.indexOf( prefix ) ) {
+				return part.substring( prefix.length, part.length );
 			}
 		}
-	  return "";
+
+		return '';
 	}
-	
-	function setCookie(cname, cvalue) {
-	  var expires = "expires=Thu, 01 Jan 1970 00:00:01 GMT"; 
-	  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+
+	function clearCookie( name ) {
+		document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/';
 	}
-	
+
+	function clearPdfLinkCookies() {
+		clearCookie( 'wp-pdf_path' );
+		clearCookie( 'wp-enable_pdf_link' );
+		clearCookie( 'wp-pdf_download_link_txt' );
+		clearCookie( 'wp-unit_tag' );
+	}
+
+	function resolveLinkData( event ) {
+		var apiResponse = event && event.detail && event.detail.apiResponse;
+
+		if ( apiResponse && true === apiResponse.cf7_pdf_download_link_enabled && apiResponse.cf7_pdf_download_link ) {
+			return {
+				enabled: true,
+				url: apiResponse.cf7_pdf_download_link.url || '',
+				text: apiResponse.cf7_pdf_download_link.text || ''
+			};
+		}
+
+		if ( apiResponse && false === apiResponse.cf7_pdf_download_link_enabled ) {
+			return { enabled: false };
+		}
+
+		if ( 'true' !== getCookie( 'wp-enable_pdf_link' ) ) {
+			return { enabled: false };
+		}
+
+		var pdfUrl = getCookie( 'wp-pdf_path' );
+		if ( ! pdfUrl ) {
+			return { enabled: false };
+		}
+
+		return {
+			enabled: true,
+			url: pdfUrl,
+			text: getCookie( 'wp-pdf_download_link_txt' ) || 'Click here to download PDF'
+		};
+	}
+
+	function getResponseOutput( event ) {
+		var unitTag = getCookie( 'wp-unit_tag' );
+		var $output = unitTag ? $( '#' + unitTag + ' .wpcf7-response-output' ) : $();
+
+		if ( ! $output.length ) {
+			$output = $( event.target ).find( '.wpcf7-response-output' );
+		}
+
+		if ( ! $output.length ) {
+			$output = $( '.wpcf7-form.sent .wpcf7-response-output' );
+		}
+
+		return $output;
+	}
+
+	function appendPdfLink( event ) {
+		var linkData = resolveLinkData( event );
+
+		if ( ! linkData.enabled || ! linkData.url ) {
+			clearPdfLinkCookies();
+			return;
+		}
+
+		var $output = getResponseOutput( event );
+		if ( ! $output.length || $output.find( '.download-lnk-pdf' ).length ) {
+			return;
+		}
+
+		var $link = $( '<a>', {
+			class: 'download-lnk-pdf',
+			href: linkData.url,
+			target: '_blank',
+			rel: 'noopener noreferrer',
+			text: linkData.text || 'Click here to download PDF'
+		} );
+
+		$output.append( '<br>' ).append( $link );
+		clearPdfLinkCookies();
+	}
+
 	document.addEventListener( 'wpcf7mailsent', function( event ) {
-
-		var pdf_value = getCookie('wp-pdf_path');
-		var enable_pdf_link = getCookie('wp-enable_pdf_link');
-		var pdf_download_link_txt = getCookie('wp-pdf_download_link_txt');
-		var unit_tag = getCookie('wp-unit_tag');
-		if(enable_pdf_link == 'true')
-		{
-			if( pdf_value ){ 
-				setTimeout(function(){ 
-					if ($(".wpcf7").hasClass("wpcf7-mail-sent-ok")) {
-						$('#'+unit_tag+' .wpcf7-response-output').append( '<br><a class="download-lnk-pdf" href="'+pdf_value+'" target="_blank">'+pdf_download_link_txt+'</a>' );	    
-						setCookie("pdf_path", '');
-					}
-					else
-					{
-						$('#'+unit_tag+' .wpcf7-response-output').append( '<br><a class="download-lnk-pdf" href="'+pdf_value+'" target="_blank">'+pdf_download_link_txt+'</a>' );	    
-						setCookie("pdf_path", '');
-					}
-	
-				}, 250);
-			}
-		}
+		setTimeout( function() {
+			appendPdfLink( event );
+		}, 100 );
 	}, false );
-
-})( jQuery );
+}( jQuery ) );
